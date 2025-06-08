@@ -304,6 +304,41 @@ For more examples, see our [Docker Examples](https://github.com/unclecode/crawl4
 
 </details>
 
+## API Usage
+
+### Multi-Page Crawling
+
+`/crawl` and `/crawl/stream` normally process a single page. When the request includes
+`crawler_config.deep_crawl_strategy`, the crawler follows links across multiple
+pages using the specified strategy. Available strategies include:
+
+- **BFSDeepCrawlStrategy** – breadth-first traversal
+- **DFSDeepCrawlStrategy** – depth-first traversal
+- **BestFirstCrawlingStrategy** – score-based prioritization
+
+See the [Deep Crawling documentation](docs/md_v2/core/deep-crawling.md) for
+details.
+
+Example request:
+
+```json
+{
+  "urls": ["https://example.com"],
+  "browser_config": {"type": "BrowserConfig", "params": {"headless": true}},
+  "crawler_config": {
+    "type": "CrawlerRunConfig",
+    "params": {
+      "deep_crawl_strategy": {
+        "type": "BFSDeepCrawlStrategy",
+        "params": {"max_depth": 1, "max_pages": 4}
+      }
+    }
+  }
+}
+```
+
+Adapted from [`demo_docker_api.py`](docs/examples/docker/demo_docker_api.py).
+
 
 ## 🔬 Advanced Usage Examples 🔬
 
