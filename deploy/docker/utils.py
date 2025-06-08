@@ -1,6 +1,7 @@
 import dns.resolver
 import logging
 import yaml
+import os
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -22,7 +23,10 @@ def load_config() -> Dict:
     """Load and return application configuration."""
     config_path = Path(__file__).parent / "config.yml"
     with open(config_path, "r") as config_file:
-        return yaml.safe_load(config_file)
+        config = yaml.safe_load(config_file)
+    # Allow port override via environment variable
+    config["app"]["port"] = int(os.getenv("PORT", config["app"]["port"]))
+    return config
 
 def setup_logging(config: Dict) -> None:
     """Configure application logging."""
