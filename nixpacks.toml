@@ -1,0 +1,12 @@
+nixPkgs = ['python312']
+
+[phases.install]
+cmds = [
+  'pip install --no-cache-dir -r deploy/docker/requirements.txt',
+  'pip install --no-cache-dir -r requirements.txt',
+  'crawl4ai-setup'
+]
+
+[start]
+cmd = 'gunicorn deploy/docker/server:app --bind 0.0.0.0:${PORT} --workers 1 --threads 4 --timeout 1800 --graceful-timeout 30 --keep-alive 300 --log-level info --worker-class uvicorn.workers.UvicornWorker'
+

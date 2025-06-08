@@ -1,0 +1,27 @@
+# Deploying Crawl4AI on Railway with Nixpacks
+
+This guide explains how to run the API on [Railway](https://railway.app/) using the provided `nixpacks.toml` configuration.
+
+## 1. Prepare Environment Variables
+
+1. Copy the example file:
+   ```bash
+   cp .llm.env.example .llm.env
+   ```
+2. Add your API keys to `.llm.env`.
+3. In Railway, create environment variables for each key in the file.
+
+## 2. Deploy with Nixpacks
+
+Railway automatically detects `nixpacks.toml`. Commit the file and deploy your project. The install phase runs `crawl4ai-setup` and installs all dependencies.
+
+## 3. Using the API from n8n
+
+After deployment, note the Railway service URL. You can call existing endpoints, such as `/crawl`, using n8n's **HTTP Request** node.
+
+```text
+POST <your-railway-url>/crawl
+```
+
+Set any required headers or parameters as documented in the API.
+

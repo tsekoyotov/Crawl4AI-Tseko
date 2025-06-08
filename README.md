@@ -158,6 +158,7 @@ crwl https://www.example.com/products -q "Extract all product prices"
 - 🔄 **API Gateway**: One-click deployment with secure token authentication for API-based workflows.
 - 🌐 **Scalable Architecture**: Designed for mass-scale production and optimized server performance.
 - ☁️ **Cloud Deployment**: Ready-to-deploy configurations for major cloud platforms.
+- 🚂 **Railway Nixpacks**: [Deployment Guide](docs/tutorials/railway-nixpacks.md)
 
 </details>
 
