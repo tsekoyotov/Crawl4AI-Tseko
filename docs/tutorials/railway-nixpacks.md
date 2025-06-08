@@ -8,8 +8,17 @@ This guide explains how to run the API on [Railway](https://railway.app/) using 
    ```bash
    cp .llm.env.example .llm.env
    ```
-2. Add your API keys to `.llm.env`.
-3. In Railway, create environment variables for each key in the file.
+2. Populate `.llm.env` with references to Railway variables:
+   ```ini
+   OPENAI_API_KEY=${OPENAI_API_KEY}
+   DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+   ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+   GROQ_API_KEY=${GROQ_API_KEY}
+   TOGETHER_API_KEY=${TOGETHER_API_KEY}
+   MISTRAL_API_KEY=${MISTRAL_API_KEY}
+   GEMINI_API_TOKEN=${GEMINI_API_TOKEN}
+   ```
+3. In Railway, create environment variables for each key above and provide your actual API keys.
 
 ## 2. Deploy with Nixpacks
 
