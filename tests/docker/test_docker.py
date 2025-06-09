@@ -11,7 +11,7 @@ from crawl4ai import LLMConfig
 from crawl4ai.docker_client import Crawl4aiDockerClient
 
 class Crawl4AiTester:
-    def __init__(self, base_url: str = "http://localhost:11235"):
+    def __init__(self, base_url: str = "http://localhost:6379"):
         self.base_url = base_url
 
     def submit_and_wait(

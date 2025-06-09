@@ -19,7 +19,7 @@ console = Console()
 
 # --- Configuration ---
 BASE_URL = os.getenv("CRAWL4AI_TEST_URL", "http://localhost:8020")
-BASE_URL = os.getenv("CRAWL4AI_TEST_URL", "http://localhost:11235")
+BASE_URL = os.getenv("CRAWL4AI_TEST_URL", "http://localhost:6379")
 # Target URLs
 SIMPLE_URL = "https://example.com"  # For demo purposes
 SIMPLE_URL = "https://httpbin.org/html"

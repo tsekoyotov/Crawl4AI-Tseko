@@ -229,7 +229,7 @@ async def api_example():
         }
 
         async with session.post(
-            "http://localhost:11235/crawl", json=crawl_request, headers=headers
+            "http://localhost:6379/crawl", json=crawl_request, headers=headers
         ) as response:
             task_data = await response.json()
             task_id = task_data["task_id"]
@@ -237,7 +237,7 @@ async def api_example():
             # Check task status
             while True:
                 async with session.get(
-                    f"http://localhost:11235/task/{task_id}", headers=headers
+                    f"http://localhost:6379/task/{task_id}", headers=headers
                 ) as status_response:
                     result = await status_response.json()
                     print(f"Task status: {result['status']}")

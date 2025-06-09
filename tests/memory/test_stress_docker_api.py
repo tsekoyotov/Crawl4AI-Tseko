@@ -5,7 +5,7 @@ Examples
 --------
 python test_stress_docker_api.py --urls 1000 --concurrency 32
 python test_stress_docker_api.py --urls 1000 --concurrency 32 --stream
-python test_stress_docker_api.py --base-url http://10.0.0.42:11235 --http2
+python test_stress_docker_api.py --base-url http://10.0.0.42:6379 --http2
 """
 
 import argparse, asyncio, json, secrets, statistics, time
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--urls", type=int, default=100, help="number of URLs")
     p.add_argument("--concurrency", type=int, default=1, help="max POSTs in flight")
     p.add_argument("--chunk-size", type=int, default=50, help="URLs per request")
-    p.add_argument("--base-url", default="http://localhost:11235", help="API root")
+    p.add_argument("--base-url", default="http://localhost:6379", help="API root")
     # p.add_argument("--base-url", default="http://localhost:8020", help="API root")
     p.add_argument("--stream", action="store_true", help="use /crawl/stream")
     p.add_argument("--http2", action="store_true", help="enable HTTP/2")

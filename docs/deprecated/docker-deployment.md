@@ -13,50 +13,50 @@ Choose the appropriate image based on your platform and needs:
 ```bash
 # Basic version (recommended)
 docker pull unclecode/crawl4ai:basic-amd64
-docker run -p 11235:11235 unclecode/crawl4ai:basic-amd64
+docker run -p 6379:6379 unclecode/crawl4ai:basic-amd64
 
 # Full ML/LLM support
 docker pull unclecode/crawl4ai:all-amd64
-docker run -p 11235:11235 unclecode/crawl4ai:all-amd64
+docker run -p 6379:6379 unclecode/crawl4ai:all-amd64
 
 # With GPU support
 docker pull unclecode/crawl4ai:gpu-amd64
-docker run -p 11235:11235 unclecode/crawl4ai:gpu-amd64
+docker run -p 6379:6379 unclecode/crawl4ai:gpu-amd64
 ```
 
 ### For ARM64 (M1/M2 Macs, ARM servers):
 ```bash
 # Basic version (recommended)
 docker pull unclecode/crawl4ai:basic-arm64
-docker run -p 11235:11235 unclecode/crawl4ai:basic-arm64
+docker run -p 6379:6379 unclecode/crawl4ai:basic-arm64
 
 # Full ML/LLM support
 docker pull unclecode/crawl4ai:all-arm64
-docker run -p 11235:11235 unclecode/crawl4ai:all-arm64
+docker run -p 6379:6379 unclecode/crawl4ai:all-arm64
 
 # With GPU support
 docker pull unclecode/crawl4ai:gpu-arm64
-docker run -p 11235:11235 unclecode/crawl4ai:gpu-arm64
+docker run -p 6379:6379 unclecode/crawl4ai:gpu-arm64
 ```
 
 Need more memory? Add `--shm-size`:
 ```bash
-docker run --shm-size=2gb -p 11235:11235 unclecode/crawl4ai:basic-amd64
+docker run --shm-size=2gb -p 6379:6379 unclecode/crawl4ai:basic-amd64
 ```
 
 Test the installation:
 ```bash
-curl http://localhost:11235/health
+curl http://localhost:6379/health
 ```
 
 ### For Raspberry Pi (32-bit) (coming soon):
 ```bash
 # Pull and run basic version (recommended for Raspberry Pi)
 docker pull unclecode/crawl4ai:basic-armv7
-docker run -p 11235:11235 unclecode/crawl4ai:basic-armv7
+docker run -p 6379:6379 unclecode/crawl4ai:basic-armv7
 
 # With increased shared memory if needed
-docker run --shm-size=2gb -p 11235:11235 unclecode/crawl4ai:basic-armv7
+docker run --shm-size=2gb -p 6379:6379 unclecode/crawl4ai:basic-armv7
 ```
 
 Note: Due to hardware constraints, only the basic version is recommended for Raspberry Pi.
@@ -103,15 +103,15 @@ docker build --platform linux/amd64 \
 Run your local build:
 ```bash
 # Regular run
-docker run -p 11235:11235 crawl4ai:local
+docker run -p 6379:6379 crawl4ai:local
 
 # With increased shared memory
-docker run --shm-size=2gb -p 11235:11235 crawl4ai:local
+docker run --shm-size=2gb -p 6379:6379 crawl4ai:local
 ```
 
 Test the installation:
 ```bash
-curl http://localhost:11235/health
+curl http://localhost:6379/health
 ```
 
 </details>
@@ -166,7 +166,7 @@ The compose file includes:
 
 Test the installation:
 ```bash
-curl http://localhost:11235/health
+curl http://localhost:6379/health
 ```
 
 </details>
@@ -183,7 +183,7 @@ Deploy your own instance of Crawl4AI with one click:
 The deploy will:
 - Set up a Docker container with Crawl4AI
 - Configure Playwright and all dependencies
-- Start the FastAPI server on port `11235`
+- Start the FastAPI server on port `6379`
 - Set up health checks and auto-deployment
 
 </details>

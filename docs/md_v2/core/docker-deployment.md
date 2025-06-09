@@ -96,7 +96,7 @@ EOL
 *   **Basic run:**
     ```bash
     docker run -d \
-      -p 11235:11235 \
+      -p 6379:6379 \
       --name crawl4ai \
       --shm-size=1g \
       unclecode/crawl4ai:latest
@@ -106,14 +106,14 @@ EOL
     ```bash
     # Make sure .llm.env is in the current directory
     docker run -d \
-      -p 11235:11235 \
+      -p 6379:6379 \
       --name crawl4ai \
       --env-file .llm.env \
       --shm-size=1g \
       unclecode/crawl4ai:latest
     ```
 
-> The server will be available at `http://localhost:11235`. Visit `/playground` to access the interactive testing interface.
+> The server will be available at `http://localhost:6379`. Visit `/playground` to access the interactive testing interface.
 
 #### 4. Stopping the Container
 
@@ -179,7 +179,7 @@ The `docker-compose.yml` file in the project root provides a simplified approach
     ENABLE_GPU=true docker compose up --build -d
     ```
 
-> The server will be available at `http://localhost:11235`.
+> The server will be available at `http://localhost:6379`.
 
 #### 4. Stopping the Service
 
@@ -220,7 +220,7 @@ docker buildx build \
 *   **Basic run (no LLM support):**
     ```bash
     docker run -d \
-      -p 11235:11235 \
+      -p 6379:6379 \
       --name crawl4ai-standalone \
       --shm-size=1g \
       crawl4ai-local:latest
@@ -230,14 +230,14 @@ docker buildx build \
     ```bash
     # Make sure .llm.env is in the current directory (project root)
     docker run -d \
-      -p 11235:11235 \
+      -p 6379:6379 \
       --name crawl4ai-standalone \
       --env-file .llm.env \
       --shm-size=1g \
       crawl4ai-local:latest
     ```
 
-> The server will be available at `http://localhost:11235`.
+> The server will be available at `http://localhost:6379`.
 
 #### 4. Stopping the Manual Container
 
@@ -259,8 +259,8 @@ MCP is an open protocol that standardizes how applications provide context to LL
 
 The Crawl4AI server exposes two MCP endpoints:
 
-- **Server-Sent Events (SSE)**: `http://localhost:11235/mcp/sse`
-- **WebSocket**: `ws://localhost:11235/mcp/ws`
+- **Server-Sent Events (SSE)**: `http://localhost:6379/mcp/sse`
+- **WebSocket**: `ws://localhost:6379/mcp/ws`
 
 ### Using with Claude Code
 
@@ -268,7 +268,7 @@ You can add Crawl4AI as an MCP tool provider in Claude Code with a simple comman
 
 ```bash
 # Add the Crawl4AI server as an MCP provider
-claude mcp add --transport sse c4ai-sse http://localhost:11235/mcp/sse
+claude mcp add --transport sse c4ai-sse http://localhost:6379/mcp/sse
 
 # List all MCP providers to verify it was added
 claude mcp list
@@ -299,7 +299,7 @@ python tests/mcp/test_mcp_socket.py
 
 ### MCP Schemas
 
-Access the MCP tool schemas at `http://localhost:11235/mcp/schema` for detailed information on each tool's parameters and capabilities.
+Access the MCP tool schemas at `http://localhost:6379/mcp/schema` for detailed information on each tool's parameters and capabilities.
 
 ---
 
@@ -421,11 +421,11 @@ docker buildx build \
 
 ## Using the API
 
-Communicate with the running Docker server via its REST API (defaulting to `http://localhost:11235`). You can use the Python SDK or make direct HTTP requests.
+Communicate with the running Docker server via its REST API (defaulting to `http://localhost:6379`). You can use the Python SDK or make direct HTTP requests.
 
 ### Playground Interface
 
-A built-in web playground is available at `http://localhost:11235/playground` for testing and generating API requests. The playground allows you to:
+A built-in web playground is available at `http://localhost:6379/playground` for testing and generating API requests. The playground allows you to:
 
 1. Configure `CrawlerRunConfig` and `BrowserConfig` using the main library's Python syntax
 2. Test crawling operations directly from the interface
@@ -444,7 +444,7 @@ from crawl4ai import BrowserConfig, CrawlerRunConfig, CacheMode # Assuming you h
 
 async def main():
     # Point to the correct server port
-    async with Crawl4aiDockerClient(base_url="http://localhost:11235", verbose=True) as client:
+    async with Crawl4aiDockerClient(base_url="http://localhost:6379", verbose=True) as client:
         # If JWT is enabled on the server, authenticate first:
         # await client.authenticate("user@example.com") # See Server Configuration section
 
@@ -531,7 +531,7 @@ Crucially, when sending configurations directly via JSON, they **must** follow t
 
 ### REST API Examples
 
-Update URLs to use port `11235`.
+Update URLs to use port `6379`.
 
 #### Simple Crawl
 
@@ -554,7 +554,7 @@ crawl_payload = {
     "crawler_config": crawler_config_payload
 }
 response = requests.post(
-    "http://localhost:11235/crawl", # Updated port
+    "http://localhost:6379/crawl", # Updated port
     # headers={"Authorization": f"Bearer {token}"},  # If JWT is enabled
     json=crawl_payload
 )
@@ -574,7 +574,7 @@ import httpx # Use httpx for async streaming example
 
 async def test_stream_crawl(token: str = None): # Made token optional
     """Test the /crawl/stream endpoint with multiple URLs."""
-    url = "http://localhost:11235/crawl/stream" # Updated port
+    url = "http://localhost:6379/crawl/stream" # Updated port
     payload = {
         "urls": [
             "https://httpbin.org/html",
@@ -635,7 +635,7 @@ Keep an eye on your crawler with these endpoints:
 
 Example health check:
 ```bash
-curl http://localhost:11235/health
+curl http://localhost:6379/health
 ```
 
 ---
@@ -720,7 +720,7 @@ observability:
     endpoint: "/health"
 ```
 
-*(JWT Authentication section remains the same, just note the default port is now 11235 for requests)*
+*(JWT Authentication section remains the same, just note the default port is now 6379 for requests)*
 
 *(Configuration Tips and Best Practices remain the same)*
 
@@ -741,7 +741,7 @@ You can override the default `config.yml`.
     *   **Using `docker run`:**
         ```bash
         # Assumes my-custom-config.yml is in the current directory
-        docker run -d -p 11235:11235 \
+        docker run -d -p 6379:6379 \
           --name crawl4ai-custom-config \
           --env-file .llm.env \
           --shm-size=1g \
@@ -810,7 +810,7 @@ In this guide, we've covered everything you need to get started with Crawl4AI's 
 - Connecting via the Model Context Protocol (MCP)
 - Monitoring your deployment
 
-The new playground interface at `http://localhost:11235/playground` makes it much easier to test configurations and generate the corresponding JSON for API requests.
+The new playground interface at `http://localhost:6379/playground` makes it much easier to test configurations and generate the corresponding JSON for API requests.
 
 For AI application developers, the MCP integration allows tools like Claude Code to directly access Crawl4AI's capabilities without complex API handling.
 
