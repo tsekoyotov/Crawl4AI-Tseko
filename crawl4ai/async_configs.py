@@ -1126,7 +1126,7 @@ class CrawlerRunConfig():
             self.chunking_strategy = RegexChunking()
 
         # Deep Crawl Parameters
-        self.deep_crawl_strategy = deep_crawl_strategy
+        self.deep_crawl_strategy = _resolve_deep_crawl_strategy(deep_crawl_strategy)
         
         # Experimental Parameters
         self.experimental = experimental or {}
@@ -1245,7 +1245,9 @@ class CrawlerRunConfig():
             user_agent_mode=kwargs.get("user_agent_mode"),
             user_agent_generator_config=kwargs.get("user_agent_generator_config", {}),
             # Deep Crawl Parameters
-            deep_crawl_strategy=kwargs.get("deep_crawl_strategy"),
+            deep_crawl_strategy=_resolve_deep_crawl_strategy(
+                kwargs.get("deep_crawl_strategy")
+            ),
             url=kwargs.get("url"),
             # Experimental Parameters 
             experimental=kwargs.get("experimental"),
