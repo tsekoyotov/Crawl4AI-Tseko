@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 from typing import List, Tuple, Dict
+import httpx
 from functools import partial
 from uuid import uuid4
 from datetime import datetime
@@ -452,6 +453,10 @@ async def handle_crawl_request(
             "server_memory_delta_mb": mem_delta_mb,
             "server_peak_memory_mb": peak_mem_mb
         }
+
+    except (httpx.RequestError, OSError, TimeoutError) as e:
+        logger.error(f"Crawl request failed: {e}")
+        raise HTTPException(status_code=502, detail=str(e))
 
     except Exception as e:
         logger.exception(f"Crawl error for request {request_id}: {e}")

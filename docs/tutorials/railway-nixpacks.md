@@ -34,3 +34,15 @@ POST <your-railway-url>/crawl
 
 Set any required headers or parameters as documented in the API.
 
+For example, send a JSON body like:
+
+```json
+{
+  "urls": ["https://example.com"],
+  "browser_config": {},
+  "crawler_config": {}
+}
+```
+
+A 502 response means the target website didn't respond.
+
