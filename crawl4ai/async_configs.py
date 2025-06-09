@@ -18,7 +18,12 @@ from .chunking_strategy import ChunkingStrategy, RegexChunking
 
 from .markdown_generation_strategy import MarkdownGenerationStrategy, DefaultMarkdownGenerator
 from .content_scraping_strategy import ContentScrapingStrategy, WebScrapingStrategy
-from .deep_crawling import DeepCrawlStrategy
+from .deep_crawling import (
+    DeepCrawlStrategy,
+    BFSDeepCrawlStrategy,
+    DFSDeepCrawlStrategy,
+    BestFirstCrawlingStrategy,
+)
 
 from .cache_context import CacheMode
 from .proxy_strategy import ProxyRotationStrategy
@@ -29,6 +34,48 @@ from typing import Any, Dict, Optional
 from enum import Enum
 
 # from .proxy_strategy import ProxyConfig
+
+# Mapping of strategy alias names to their corresponding classes
+_STRATEGY_MAP = {
+    "BFSStrategy": BFSDeepCrawlStrategy,
+    "BFSDeepCrawlStrategy": BFSDeepCrawlStrategy,
+    "DFSStrategy": DFSDeepCrawlStrategy,
+    "DFSDeepCrawlStrategy": DFSDeepCrawlStrategy,
+    "BFFStrategy": BestFirstCrawlingStrategy,
+    "BestFirstCrawlingStrategy": BestFirstCrawlingStrategy,
+}
+
+
+def _resolve_deep_crawl_strategy(value: Any) -> Any:
+    """Resolve deep crawl strategy aliases to strategy instances.
+
+    Args:
+        value: A strategy dict or alias string.
+
+    Returns:
+        Instantiated strategy object if recognized, otherwise the original value.
+    """
+    if value is None or isinstance(value, DeepCrawlStrategy):
+        return value
+
+    # Dict form: {"type": "BFSStrategy", "params": {...}}
+    if isinstance(value, dict):
+        strategy_type = value.get("type")
+        cls = _STRATEGY_MAP.get(strategy_type)
+        if cls:
+            params = value.get("params", {})
+            if isinstance(params, dict):
+                return cls(**params)
+            return cls()
+        return value
+
+    # String alias form
+    if isinstance(value, str):
+        cls = _STRATEGY_MAP.get(value)
+        if cls:
+            return cls()
+
+    return value
 
 
 
@@ -1214,7 +1261,15 @@ class CrawlerRunConfig():
         # Deserialize the object from a dictionary
         config = from_serializable_dict(data)
         if isinstance(config, CrawlerRunConfig):
+            config.deep_crawl_strategy = _resolve_deep_crawl_strategy(
+                config.deep_crawl_strategy
+            )
             return config
+        if isinstance(config, dict):
+            config["deep_crawl_strategy"] = _resolve_deep_crawl_strategy(
+                config.get("deep_crawl_strategy")
+            )
+            return CrawlerRunConfig.from_kwargs(config)
         return CrawlerRunConfig.from_kwargs(config)
 
     def to_dict(self):

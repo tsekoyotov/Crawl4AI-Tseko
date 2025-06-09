@@ -132,7 +132,7 @@ class TestDeepCrawlEndpoints:
                     "stream": False,
                     "cache_mode": "BYPASS", # Use string value for CacheMode
                     "deep_crawl_strategy": {
-                        "type": "BFSDeepCrawlStrategy",
+                        "type": "BFSStrategy",
                         "params": {
                             "max_depth": max_depth,
                             "max_pages": max_pages,
@@ -190,7 +190,7 @@ class TestDeepCrawlEndpoints:
                     "stream": False,
                     "cache_mode": "BYPASS",
                     "deep_crawl_strategy": {
-                        "type": "BFSDeepCrawlStrategy",
+                        "type": "DFSStrategy",
                         "params": {
                             "max_depth": max_depth,
                             "max_pages": max_pages,
