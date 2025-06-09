@@ -12,7 +12,7 @@ If the server isn’t running, start it first:
 import sys, json, textwrap, requests
 
 # BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8020"
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:6379"
+BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
 URL  = f"{BASE.rstrip('/')}/config/dump"
 
 CASES = [

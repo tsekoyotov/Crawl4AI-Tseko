@@ -104,10 +104,10 @@ We provide a **temporary** Docker approach for testing. **It’s not stable an
 
 ```bash
 docker pull unclecode/crawl4ai:basic
-docker run -p 6379:6379 unclecode/crawl4ai:basic
+docker run -p 8080:8080 unclecode/crawl4ai:basic
 ```
 
-You can then make POST requests to `http://localhost:6379/crawl` to perform crawls. **Production usage** is discouraged until our new Docker approach is ready (planned in Jan or Feb 2025).
+You can then make POST requests to `http://localhost:8080/crawl` to perform crawls. **Production usage** is discouraged until our new Docker approach is ready (planned in Jan or Feb 2025).
 
 ---
 

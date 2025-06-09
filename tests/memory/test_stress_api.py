@@ -24,7 +24,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 
 # --- Constants ---
-DEFAULT_API_URL = "http://localhost:6379" # Default port
+DEFAULT_API_URL = "http://localhost:8080" # Default port
 DEFAULT_API_URL = "http://localhost:8020" # Default port
 DEFAULT_URL_COUNT = 100
 DEFAULT_MAX_CONCURRENT_REQUESTS = 1
