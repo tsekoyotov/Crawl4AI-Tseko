@@ -271,9 +271,9 @@ The new Docker implementation includes:
 ```bash
 # Pull and run the latest release candidate
 docker pull unclecode/crawl4ai:0.6.0-rN # Use your favorite revision number
-docker run -d -p 6379:6379 --name crawl4ai --shm-size=1g unclecode/crawl4ai:0.6.0-rN # Use your favorite revision number
+docker run -d -p 8080:8080 --name crawl4ai --shm-size=1g unclecode/crawl4ai:0.6.0-rN # Use your favorite revision number
 
-# Visit the playground at http://localhost:6379/playground
+# Visit the playground at http://localhost:8080/playground (port 6379 still works if you override $PORT)
 ```
 
 For complete documentation, see our [Docker Deployment Guide](https://docs.crawl4ai.com/core/docker-deployment/).
@@ -291,13 +291,13 @@ import requests
 
 # Submit a crawl job
 response = requests.post(
-    "http://localhost:6379/crawl",
+    "http://localhost:8080/crawl",  # default port; use 6379 if set in $PORT
     json={"urls": "https://example.com", "priority": 10}
 )
 task_id = response.json()["task_id"]
 
 # Continue polling until the task is complete (status="completed")
-result = requests.get(f"http://localhost:6379/task/{task_id}")
+result = requests.get(f"http://localhost:8080/task/{task_id}")
 ```
 
 For more examples, see our [Docker Examples](https://github.com/unclecode/crawl4ai/blob/main/docs/examples/docker_example.py). For advanced configuration, environment variables, and usage examples, see our [Docker Deployment Guide](https://docs.crawl4ai.com/basic/docker-deployment/).
@@ -602,10 +602,10 @@ async def test_news_crawl():
 - **🔌 MCP Integration**: Connect to AI tools like Claude Code through the Model Context Protocol
   ```bash
   # Add Crawl4AI to Claude Code
-  claude mcp add --transport sse c4ai-sse http://localhost:6379/mcp/sse
+  claude mcp add --transport sse c4ai-sse http://localhost:8080/mcp/sse
   ```
 
-- **🖥️ Interactive Playground**: Test configurations and generate API requests with the built-in web interface at `http://localhost:6379//playground`
+- **🖥️ Interactive Playground**: Test configurations and generate API requests with the built-in web interface at `http://localhost:8080//playground`
 
 - **🐳 Revamped Docker Deployment**: Streamlined multi-architecture Docker image with improved resource efficiency
 
