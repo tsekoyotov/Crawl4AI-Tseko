@@ -12,6 +12,9 @@ POOL: Dict[str, AsyncWebCrawler] = {}
 LAST_USED: Dict[str, float] = {}
 LOCK = asyncio.Lock()
 
+# Track how many pages are currently in flight across all crawlers
+PAGES_IN_FLIGHT = 0
+
 MEM_LIMIT  = CONFIG.get("crawler", {}).get("memory_threshold_percent", 95.0)   # % RAM – refuse new browsers above this
 IDLE_TTL  = CONFIG.get("crawler", {}).get("pool", {}).get("idle_ttl_sec", 1800)   # close if unused for 30 min
 
@@ -58,3 +61,11 @@ async def janitor():
                 if now - LAST_USED[sig] > IDLE_TTL:
                     with suppress(Exception): await crawler.close()
                     POOL.pop(sig, None); LAST_USED.pop(sig, None)
+
+def get_stats() -> Dict[str, int]:
+    """Return basic pool statistics."""
+    return {
+        "pages_in_flight": PAGES_IN_FLIGHT,
+        "max_pages": CONFIG.get("crawler", {}).get("pool", {}).get("max_pages", 0),
+        "open_browsers": len(POOL),
+    }

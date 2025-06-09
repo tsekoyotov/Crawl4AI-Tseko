@@ -61,10 +61,13 @@ def decode_redis_hash(hash_data: Dict[bytes, bytes]) -> Dict[str, str]:
 
 
 def verify_email_domain(email: str) -> bool:
+    domain = email.split('@')[1]
     try:
-        domain = email.split('@')[1]
-        # Try to resolve MX records for the domain.
         records = dns.resolver.resolve(domain, 'MX')
         return True if records else False
+    except dns.exception.DNSException as e:
+        logging.warning("DNS lookup failed for %s: %s", domain, e)
+        return False
     except Exception as e:
+        logging.error("Unexpected error verifying %s: %s", domain, e, exc_info=True)
         return False

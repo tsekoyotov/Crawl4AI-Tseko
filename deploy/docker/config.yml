@@ -35,10 +35,11 @@ rate_limiting:
 
 # Security Configuration
 security:
-  enabled: false 
-  jwt_enabled: false 
+  enabled: false
+  jwt_enabled: false
   https_redirect: false
   trusted_hosts: ["*"]
+  skip_email_domain_check: false
   headers:
     x_content_type_options: "nosniff"
     x_frame_options: "DENY"

@@ -397,6 +397,7 @@ async def handle_crawl_request(
     config: dict
 ) -> dict:
     """Handle non-streaming crawl requests."""
+    request_id = uuid4().hex
     start_mem_mb = _get_memory_mb() # <--- Get memory before
     start_time = time.time()
     mem_delta_mb = None
@@ -453,7 +454,7 @@ async def handle_crawl_request(
         }
 
     except Exception as e:
-        logger.error(f"Crawl error: {str(e)}", exc_info=True)
+        logger.exception(f"Crawl error for request {request_id}: {e}")
         if 'crawler' in locals() and crawler.ready: # Check if crawler was initialized and started
             #  try:
             #      await crawler.close()
@@ -468,8 +469,9 @@ async def handle_crawl_request(
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=json.dumps({ # Send structured error
+            detail=json.dumps({
                 "error": str(e),
+                "request_id": request_id,
                 "server_memory_delta_mb": mem_delta_mb,
                 "server_peak_memory_mb": max(peak_mem_mb if peak_mem_mb else 0, end_mem_mb_error or 0)
             })

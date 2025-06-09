@@ -114,6 +114,8 @@ EOL
     ```
 
 > The server will be available at `http://localhost:6379`. Visit `/playground` to access the interactive testing interface.
+> Gunicorn binds to the port specified by the `$PORT` environment variable when
+> the container starts (defaulting to `6379` if not set).
 
 #### 4. Stopping the Container
 
@@ -180,6 +182,10 @@ The `docker-compose.yml` file in the project root provides a simplified approach
     ```
 
 > The server will be available at `http://localhost:6379`.
+> Like other deployment methods, the `$PORT` environment variable can override
+> the default Gunicorn binding.
+> Gunicorn uses the `$PORT` environment variable here as well, falling back to
+> `6379`.
 
 #### 4. Stopping the Service
 
@@ -660,7 +666,8 @@ app:
   title: "Crawl4AI API"
   version: "1.0.0" # Consider setting this to match library version, e.g., "0.5.1"
   host: "0.0.0.0"
-  port: 8020 # NOTE: This port is used ONLY when running server.py directly. Gunicorn overrides this (see supervisord.conf).
+  port: 8020 # NOTE: This value is used only when running server.py directly.
+              # Gunicorn binds to $PORT at runtime (default 6379).
   reload: False # Default set to False - suitable for production
   timeout_keep_alive: 300
 
