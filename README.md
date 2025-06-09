@@ -273,7 +273,7 @@ The new Docker implementation includes:
 docker pull unclecode/crawl4ai:0.6.0-rN # Use your favorite revision number
 docker run -d -p 8080:8080 --name crawl4ai --shm-size=1g unclecode/crawl4ai:0.6.0-rN # Use your favorite revision number
 
-# Visit the playground at http://localhost:8080/playground (port 6379 still works if you override $PORT)
+# Visit the playground at http://localhost:8080/playground
 ```
 
 For complete documentation, see our [Docker Deployment Guide](https://docs.crawl4ai.com/core/docker-deployment/).
@@ -291,7 +291,7 @@ import requests
 
 # Submit a crawl job
 response = requests.post(
-    "http://localhost:8080/crawl",  # default port; use 6379 if set in $PORT
+    "http://localhost:8080/crawl",  # default port; uses  if set
     json={"urls": "https://example.com", "priority": 10}
 )
 task_id = response.json()["task_id"]
