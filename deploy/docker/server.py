@@ -7,6 +7,7 @@ Crawl4AI FastAPI entry‑point
 """
 
 # ── stdlib & 3rd‑party imports ───────────────────────────────
+import crawler_pool
 from crawler_pool import get_crawler, close_all, janitor
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 from auth import create_access_token, get_token_dependency, TokenRequest
@@ -35,6 +36,7 @@ from schemas import (
 from utils import (
     FilterType, load_config, setup_logging, verify_email_domain
 )
+import logging
 import os
 import sys
 import time
@@ -71,6 +73,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 # ────────────────── configuration / logging ──────────────────
 config = load_config()
 setup_logging(config)
+logger = logging.getLogger(__name__)
+logger.info("Server binding to port %s", config["app"]["port"])
 
 __version__ = "0.5.1-d1"
 
@@ -95,7 +99,11 @@ orig_arun = AsyncWebCrawler.arun
 
 async def capped_arun(self, *a, **kw):
     async with GLOBAL_SEM:
-        return await orig_arun(self, *a, **kw)
+        crawler_pool.PAGES_IN_FLIGHT += 1
+        try:
+            return await orig_arun(self, *a, **kw)
+        finally:
+            crawler_pool.PAGES_IN_FLIGHT -= 1
 AsyncWebCrawler.arun = capped_arun
 
 # ───────────────────── FastAPI lifespan ──────────────────────
@@ -215,8 +223,9 @@ app.include_router(init_job_router(redis, config, token_dep))
 # ──────────────────────── Endpoints ──────────────────────────
 @app.post("/token")
 async def get_token(req: TokenRequest):
-    if not verify_email_domain(req.email):
-        raise HTTPException(400, "Invalid email domain")
+    if not config["security"].get("skip_email_domain_check", False):
+        if not verify_email_domain(req.email):
+            raise HTTPException(400, "Invalid email domain")
     token = create_access_token({"sub": req.email})
     return {"email": req.email, "access_token": token, "token_type": "bearer"}
 
@@ -422,6 +431,12 @@ async def health():
 @app.get(config["observability"]["prometheus"]["endpoint"])
 async def metrics():
     return RedirectResponse(config["observability"]["prometheus"]["endpoint"])
+
+
+@app.get("/stats")
+async def stats():
+    """Return simple usage metrics."""
+    return crawler_pool.get_stats()
 
 
 @app.post("/crawl")
