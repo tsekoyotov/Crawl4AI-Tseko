@@ -67,15 +67,16 @@ def _resolve_deep_crawl_strategy(value: Any) -> Any:
             if isinstance(params, dict):
                 return cls(**params)
             return cls()
-        return value
+        raise ValueError(f"Unknown deep crawl strategy type: {strategy_type}")
 
     # String alias form
     if isinstance(value, str):
         cls = _STRATEGY_MAP.get(value)
         if cls:
             return cls()
+        raise ValueError(f"Unknown deep crawl strategy alias: {value}")
 
-    return value
+    raise TypeError(f"Invalid deep crawl strategy: {value!r}")
 
 
 

@@ -457,6 +457,9 @@ async def handle_crawl_request(
     except (httpx.RequestError, OSError, TimeoutError) as e:
         logger.error(f"Crawl request failed: {e}")
         raise HTTPException(status_code=502, detail=str(e))
+    except ValueError as e:
+        logger.error(f"Invalid crawl configuration: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
     except Exception as e:
         logger.exception(f"Crawl error for request {request_id}: {e}")
@@ -518,6 +521,17 @@ async def handle_stream_crawl_request(
         )
 
         return crawler, results_gen
+
+    except ValueError as e:
+        if 'crawler' in locals() and crawler.ready:
+            try:
+                await crawler.close()
+            except Exception as close_e:  # noqa: F841 - logged for debugging
+                logger.error(
+                    f"Error closing crawler during stream setup exception: {close_e}"
+                )
+        logger.error(f"Invalid crawl configuration: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
     except Exception as e:
         # Make sure to close crawler if started during an error here
