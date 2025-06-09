@@ -3,7 +3,7 @@ version: '3.8'
 # Shared configuration for all environments
 x-base-config: &base-config
   ports:
-    - "6379:6379"  # Gunicorn port
+    - "8080:8080"  # Gunicorn port
   env_file:
     - .llm.env       # API keys (create from .llm.env.example)
   environment:
@@ -14,6 +14,7 @@ x-base-config: &base-config
     - TOGETHER_API_KEY=${TOGETHER_API_KEY:-}
     - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
     - GEMINI_API_TOKEN=${GEMINI_API_TOKEN:-}
+    - PORT=8080
   volumes:
     - /dev/shm:/dev/shm  # Chromium performance
   deploy:
@@ -24,7 +25,7 @@ x-base-config: &base-config
         memory: 1G
   restart: unless-stopped
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:6379/health"]
+    test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     interval: 30s
     timeout: 10s
     retries: 3

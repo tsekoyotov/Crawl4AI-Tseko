@@ -187,9 +187,10 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
         exit 1; \
     fi && \
     redis-cli ping > /dev/null && \
-    curl -f http://localhost:6379/health || exit 1'
+    curl -f http://localhost:8080/health || exit 1'
 
-EXPOSE 6379
+EXPOSE 8080
+ENV PORT=8080
 # Switch to the non-root user before starting the application
 USER appuser
 
