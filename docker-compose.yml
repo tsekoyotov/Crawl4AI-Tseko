@@ -3,7 +3,7 @@ version: '3.8'
 # Shared configuration for all environments
 x-base-config: &base-config
   ports:
-    - "11235:11235"  # Gunicorn port
+    - "6379:6379"  # Gunicorn port
   env_file:
     - .llm.env       # API keys (create from .llm.env.example)
   environment:
@@ -24,7 +24,7 @@ x-base-config: &base-config
         memory: 1G
   restart: unless-stopped
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:11235/health"]
+    test: ["CMD", "curl", "-f", "http://localhost:6379/health"]
     interval: 30s
     timeout: 10s
     retries: 3

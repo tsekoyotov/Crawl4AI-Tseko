@@ -101,7 +101,7 @@ async def test_context(s: ClientSession):
 
 
 async def main() -> None:
-    async with websocket_client("ws://localhost:11235/mcp/ws") as (r, w):
+    async with websocket_client("ws://localhost:6379/mcp/ws") as (r, w):
         async with ClientSession(r, w) as s:
             await s.initialize()                       # handshake
             tools = (await s.list_tools()).tools

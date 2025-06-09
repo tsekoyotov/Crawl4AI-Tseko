@@ -8,7 +8,7 @@ from typing import Dict, Any
 
 
 class Crawl4AiTester:
-    def __init__(self, base_url: str = "http://localhost:11235", api_token: str = None):
+    def __init__(self, base_url: str = "http://localhost:6379", api_token: str = None):
         self.base_url = base_url
         self.api_token = api_token or os.getenv(
             "CRAWL4AI_API_TOKEN"
@@ -66,7 +66,7 @@ class Crawl4AiTester:
 
 def test_docker_deployment(version="basic"):
     tester = Crawl4AiTester(
-        # base_url="http://localhost:11235" ,
+        # base_url="http://localhost:6379" ,
         base_url="https://crawl4ai-sby74.ondigitalocean.app",
         api_token="test",
     )

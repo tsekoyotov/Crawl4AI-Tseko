@@ -3,7 +3,7 @@ app:
   title: "Crawl4AI API"
   version: "1.0.0"
   host: "0.0.0.0"
-  port: 11235  # Default; overridden by $PORT if set
+  port: 6379  # Default; overridden by $PORT if set
   reload: False
   workers: 1
   timeout_keep_alive: 300
