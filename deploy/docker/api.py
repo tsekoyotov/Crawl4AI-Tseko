@@ -460,12 +460,13 @@ async def handle_crawl_request(
 
     except Exception as e:
         logger.exception(f"Crawl error for request {request_id}: {e}")
-        if 'crawler' in locals() and crawler.ready: # Check if crawler was initialized and started
-            #  try:
-            #      await crawler.close()
-            #  except Exception as close_e:
-            #       logger.error(f"Error closing crawler during exception handling: {close_e}")
-            logger.error(f"Error closing crawler during exception handling: {close_e}")
+        if 'crawler' in locals() and crawler.ready:  # Check if crawler was initialized and started
+            try:
+                await crawler.close()
+            except Exception as close_e:  # noqa: F841 - logged for debugging
+                logger.error(
+                    f"Error closing crawler during exception handling: {close_e}"
+                )
 
         # Measure memory even on error if possible
         end_mem_mb_error = _get_memory_mb()
@@ -521,11 +522,12 @@ async def handle_stream_crawl_request(
     except Exception as e:
         # Make sure to close crawler if started during an error here
         if 'crawler' in locals() and crawler.ready:
-            #  try:
-            #       await crawler.close()
-            #  except Exception as close_e:
-            #       logger.error(f"Error closing crawler during stream setup exception: {close_e}")
-            logger.error(f"Error closing crawler during stream setup exception: {close_e}")
+            try:
+                await crawler.close()
+            except Exception as close_e:  # noqa: F841 - logged for debugging
+                logger.error(
+                    f"Error closing crawler during stream setup exception: {close_e}"
+                )
         logger.error(f"Stream crawl error: {str(e)}", exc_info=True)
         # Raising HTTPException here will prevent streaming response
         raise HTTPException(
