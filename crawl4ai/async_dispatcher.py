@@ -5,6 +5,7 @@ from .models import (
     CrawlerTaskResult,
     CrawlStatus,
     DomainState,
+    CrawlResultContainer,  # added for compatibility with container results
 )
 
 from .components.crawler_monitor import CrawlerMonitor
