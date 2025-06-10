@@ -195,25 +195,30 @@ class AsyncLogger(AsyncLoggerBase):
         # avoid conflict with rich formatting
         parsed_message = message.replace("[", "[[").replace("]", "]]")
         if params:
-            # FIXME: If there are formatting strings in floating point format, 
-            # this may result in colors and boxes not being applied properly.
-            # such as {value:.2f}, the value is 0.23333 format it to 0.23,
-            # but we replace("0.23333", "[color]0.23333[/color]")
-            formatted_message = parsed_message.format(**params)
-            for key, value in params.items():
-                # value_str may discard `[` and `]`, so we need to replace it. 
-                value_str = str(value).replace("[", "[[").replace("]", "]]")
-                # check is need apply color
-                if colors and key in colors:
-                    color_str = f"[{colors[key]}]{value_str}[/{colors[key]}]"
-                    formatted_message = formatted_message.replace(value_str, color_str)
-                    value_str = color_str
-
-                # check is need apply box
-                if boxes and key in boxes:
-                    formatted_message = formatted_message.replace(value_str,
-                        create_box_message(value_str, type=str(level)))
-
+            import string
+            formatter = string.Formatter()
+            formatted_parts: List[str] = []
+            for literal_text, field_name, format_spec, conversion in formatter.parse(parsed_message):
+                formatted_parts.append(literal_text)
+                if field_name is None:
+                    continue
+                value = params.get(field_name, "")
+                if conversion == "r":
+                    value = repr(value)
+                elif conversion == "a":
+                    value = ascii(value)
+                # handle format specification for the value
+                try:
+                    formatted_value = format(value, format_spec) if format_spec else str(value)
+                except Exception:
+                    formatted_value = str(value)
+                value_str = str(formatted_value).replace("[", "[[").replace("]", "]]")
+                if colors and field_name in colors:
+                    value_str = f"[{colors[field_name]}]{value_str}[/{colors[field_name]}]"
+                if boxes and field_name in boxes:
+                    value_str = create_box_message(value_str, type=str(level))
+                formatted_parts.append(value_str)
+            formatted_message = "".join(formatted_parts)
         else:
             formatted_message = parsed_message
 
