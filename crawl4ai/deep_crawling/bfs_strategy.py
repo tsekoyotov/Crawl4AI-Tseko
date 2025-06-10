@@ -71,14 +71,14 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
         source_url: str,
         current_depth: int,
         visited: Set[str],
-        next_level: List[Tuple[str, Optional[str]]],
+        next_level: List[Tuple[str, Optional[str], float]],
         depths: Dict[str, int],
     ) -> None:
         """
         Extracts links from the crawl result, validates and scores them, and
         prepares the next level of URLs.
-        Each valid URL is appended to next_level as a tuple (url, parent_url)
-        and its depth is tracked.
+        Each valid URL is appended to next_level as a tuple
+        ``(url, parent_url, score)`` and its depth is tracked.
         """            
         next_depth = current_depth + 1
         if next_depth > self.max_depth:
@@ -132,11 +132,10 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
             
         # Process the final selected links
         for url, score in valid_links:
-            # attach the score to metadata if needed
             if score:
                 result.metadata = result.metadata or {}
-                result.metadata["score"] = score
-            next_level.append((url, source_url))
+                result.metadata.setdefault("link_scores", {})[url] = score
+            next_level.append((url, source_url, score))
             depths[url] = next_depth
 
     async def _arun_batch(
@@ -150,15 +149,15 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
         Processes one BFS level at a time, then yields all the results.
         """
         visited: Set[str] = set()
-        # current_level holds tuples: (url, parent_url)
-        current_level: List[Tuple[str, Optional[str]]] = [(start_url, None)]
+        # current_level holds tuples: (url, parent_url, score)
+        current_level: List[Tuple[str, Optional[str], float]] = [(start_url, None, 0.0)]
         depths: Dict[str, int] = {start_url: 0}
 
         results: List[CrawlResult] = []
 
         while current_level and not self._cancel_event.is_set():
-            next_level: List[Tuple[str, Optional[str]]] = []
-            urls = [url for url, _ in current_level]
+            next_level: List[Tuple[str, Optional[str], float]] = []
+            urls = [url for url, _, _ in current_level]
 
             # Clone the config to disable deep crawling recursion and enforce batch mode.
             batch_config = config.clone(deep_crawl_strategy=None, stream=False)
@@ -173,7 +172,7 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
                 depth = depths.get(url, 0)
                 result.metadata = result.metadata or {}
                 result.metadata["depth"] = depth
-                parent_url = next((parent for (u, parent) in current_level if u == url), None)
+                parent_url = next((parent for (u, parent, _) in current_level if u == url), None)
                 result.metadata["parent_url"] = parent_url
                 results.append(result)
                 
@@ -197,12 +196,12 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
         Processes one BFS level at a time and yields results immediately as they arrive.
         """
         visited: Set[str] = set()
-        current_level: List[Tuple[str, Optional[str]]] = [(start_url, None)]
+        current_level: List[Tuple[str, Optional[str], float]] = [(start_url, None, 0.0)]
         depths: Dict[str, int] = {start_url: 0}
 
         while current_level and not self._cancel_event.is_set():
-            next_level: List[Tuple[str, Optional[str]]] = []
-            urls = [url for url, _ in current_level]
+            next_level: List[Tuple[str, Optional[str], float]] = []
+            urls = [url for url, _, _ in current_level]
             visited.update(urls)
 
             stream_config = config.clone(deep_crawl_strategy=None, stream=True)
@@ -215,7 +214,7 @@ class BFSDeepCrawlStrategy(DeepCrawlStrategy):
                 depth = depths.get(url, 0)
                 result.metadata = result.metadata or {}
                 result.metadata["depth"] = depth
-                parent_url = next((parent for (u, parent) in current_level if u == url), None)
+                parent_url = next((parent for (u, parent, _) in current_level if u == url), None)
                 result.metadata["parent_url"] = parent_url
                 
                 # Count only successful crawls

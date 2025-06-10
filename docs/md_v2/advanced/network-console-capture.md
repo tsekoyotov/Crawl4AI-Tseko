@@ -203,3 +203,12 @@ The `result.console_messages` contains a list of dictionaries, each representing
 5. **Ad/Tracker Analysis**: Detect and catalog advertising or tracking calls
 
 This capability is especially valuable for complex sites with heavy JavaScript, single-page applications, or when you need to understand the exact communication happening between a browser and servers.
+
+## Handling `net::ERR_ABORTED` Errors
+
+When navigation fails with a `net::ERR_ABORTED` message, use these tips to troubleshoot:
+
+1. **Capture failing requests**: set `capture_network_requests=True` in `CrawlerRunConfig` to inspect the last request/response recorded before the failure.
+2. **Increase timeout**: raise `page_timeout` to give the site more time to load.
+3. **Bypass anti‑bot checks**: combine `magic`, `simulate_user`, and `override_navigator` to mimic a real browser.
+4. **Verify URLs manually**: ensure the target link is reachable outside of the crawler.

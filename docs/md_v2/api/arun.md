@@ -163,6 +163,8 @@ run_config = CrawlerRunConfig(
 - `simulate_user=True` mimics mouse movements or random delays.  
 - `override_navigator=True` fakes some navigator properties (like user agent checks).
 
+If navigation errors like `net::ERR_ABORTED` occur, see [Handling `net::ERR_ABORTED` Errors](../advanced/network-console-capture.md#handling-neterr_aborted-errors) for troubleshooting tips.
+
 ---
 
 ## 5. Session Management
