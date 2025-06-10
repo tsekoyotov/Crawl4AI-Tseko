@@ -467,7 +467,7 @@ class BrowserConfig:
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/116.0.0.0 Safari/537.36"
         ),
         user_agent_mode: str = "",
-        user_agent_generator_config: dict = {},
+        user_agent_generator_config: dict = None,
         text_mode: bool = False,
         light_mode: bool = False,
         extra_args: list = None,
@@ -505,7 +505,7 @@ class BrowserConfig:
         self.headers = headers if headers is not None else {}
         self.user_agent = user_agent
         self.user_agent_mode = user_agent_mode
-        self.user_agent_generator_config = user_agent_generator_config
+        self.user_agent_generator_config = user_agent_generator_config or {}
         self.text_mode = text_mode
         self.light_mode = light_mode
         self.extra_args = extra_args if extra_args is not None else []
@@ -876,8 +876,6 @@ class CrawlerRunConfig():
                                            Default: False.
         exclude_domains (list of str): List of specific domains to exclude from results.
                                        Default: [].
-        exclude_internal_links (bool): If True, exclude internal links from the results.
-                                       Default: False.
 
         # Debugging and Logging Parameters
         verbose (bool): Enable verbose logging.
@@ -999,7 +997,7 @@ class CrawlerRunConfig():
         check_robots_txt: bool = False,
         user_agent: str = None,
         user_agent_mode: str = None,
-        user_agent_generator_config: dict = {},
+        user_agent_generator_config: dict = None,
         # Deep Crawl Parameters
         deep_crawl_strategy: Optional[DeepCrawlStrategy] = None,
         # Experimental Parameters
@@ -1106,7 +1104,7 @@ class CrawlerRunConfig():
         # User Agent Parameters
         self.user_agent = user_agent
         self.user_agent_mode = user_agent_mode
-        self.user_agent_generator_config = user_agent_generator_config
+        self.user_agent_generator_config = user_agent_generator_config or {}
 
         # Validate type of extraction strategy and chunking strategy if they are provided
         if self.extraction_strategy is not None and not isinstance(
