@@ -669,6 +669,17 @@ We use pre-releases to:
 
 For production environments, we recommend using the stable version. For testing new features, you can opt-in to pre-releases using the `--pre` flag.
 
+## Troubleshooting `net::ERR_ABORTED` Errors
+
+If a page fails to load with a `net::ERR_ABORTED` error:
+
+- Enable `capture_network_requests` in `CrawlerRunConfig` to inspect failed requests.
+- Increase `page_timeout` to allow more time for slow sites.
+- Verify the URL manually and try including the `www` prefix when applicable.
+
+See the [Network Requests & Console Message Capturing guide](docs/md_v2/advanced/network-console-capture.md#handling-neterr_aborted-errors) for details.
+
+
 ## 📖 Documentation & Roadmap 
 
 > 🚨 **Documentation Update Alert**: We're undertaking a major documentation overhaul next week to reflect recent updates and improvements. Stay tuned for a more comprehensive and up-to-date guide!
