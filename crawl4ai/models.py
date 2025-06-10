@@ -129,7 +129,7 @@ class MarkdownGenerationResult(BaseModel):
 class CrawlResult(BaseModel):
     url: str
     html: str
-    fit_html: Optional[str] = None
+    fit_html_internal: Optional[str] = Field(None, alias="fit_html")
     success: bool
     cleaned_html: Optional[str] = None
     media: Dict[str, List[Dict]] = {}
