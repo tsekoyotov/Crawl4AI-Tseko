@@ -103,7 +103,7 @@ class BaseDispatcher(ABC):
         config: CrawlerRunConfig,
         task_id: str,
         monitor: Optional[CrawlerMonitor] = None,
-    ) -> CrawlerTaskResult:
+    ) -> List[CrawlerTaskResult]:
         pass
 
     @abstractmethod
@@ -183,7 +183,7 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
         config: CrawlerRunConfig,
         task_id: str,
         retry_count: int = 0,
-    ) -> CrawlerTaskResult:
+    ) -> List[CrawlerTaskResult]:
         start_time = time.time()
         error_message = ""
         memory_usage = peak_memory = 0.0
@@ -192,6 +192,7 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
         process = psutil.Process()
         start_memory = process.memory_info().rss / (1024 * 1024)
         
+        task_results = []
         try:
             if self.monitor:
                 self.monitor.update_task(
@@ -222,7 +223,7 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
                     )
                 
                 # Return placeholder result with requeued status
-                return CrawlerTaskResult(
+                return [CrawlerTaskResult(
                     task_id=task_id,
                     url=url,
                     result=CrawlResult(
@@ -236,28 +237,50 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
                     error_message="Requeued due to critical memory pressure",
                     retry_count=retry_count + 1
                 )
+                ]
             
             # Execute the crawl
             result = await self.crawler.arun(url, config=config, session_id=task_id)
-            
+
             # Measure memory usage
             end_memory = process.memory_info().rss / (1024 * 1024)
             memory_usage = peak_memory = end_memory - start_memory
-            
-            # Handle rate limiting
-            if self.rate_limiter and result.status_code:
-                if not self.rate_limiter.update_delay(url, result.status_code):
-                    error_message = f"Rate limit retry count exceeded for domain {urlparse(url).netloc}"
+
+            if isinstance(result, CrawlResultContainer):
+                result_list = list(result)
+            elif isinstance(result, list):
+                result_list = result
+            else:
+                result_list = [result]
+
+            task_results = []
+            for idx, res in enumerate(result_list):
+                if self.rate_limiter and res.status_code:
+                    if not self.rate_limiter.update_delay(res.url, res.status_code):
+                        error_message = f"Rate limit retry count exceeded for domain {urlparse(res.url).netloc}"
+                        if self.monitor:
+                            self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
+
+                if not res.success:
+                    error_message = res.error_message
                     if self.monitor:
                         self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
-                        
-            # Update status based on result
-            if not result.success:
-                error_message = result.error_message
-                if self.monitor:
-                    self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
-            elif self.monitor:
-                self.monitor.update_task(task_id, status=CrawlStatus.COMPLETED)
+                elif self.monitor:
+                    self.monitor.update_task(task_id, status=CrawlStatus.COMPLETED)
+
+                task_results.append(
+                    CrawlerTaskResult(
+                        task_id=f"{task_id}:{idx}" if len(result_list) > 1 else task_id,
+                        url=res.url,
+                        result=res,
+                        memory_usage=memory_usage,
+                        peak_memory=peak_memory,
+                        start_time=start_time,
+                        end_time=time.time(),
+                        error_message=res.error_message if not res.success else "",
+                        retry_count=retry_count,
+                    )
+                )
                 
         except Exception as e:
             error_message = str(e)
@@ -266,6 +289,31 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
             result = CrawlResult(
                 url=url, html="", metadata={}, success=False, error_message=str(e)
             )
+            task_results = [
+                CrawlerTaskResult(
+                    task_id=task_id,
+                    url=url,
+                    result=result,
+                    memory_usage=memory_usage,
+                    peak_memory=peak_memory,
+                    start_time=start_time,
+                    end_time=time.time(),
+                    error_message=error_message,
+                )
+            ]
+            task_results = [
+                CrawlerTaskResult(
+                    task_id=task_id,
+                    url=url,
+                    result=result,
+                    memory_usage=memory_usage,
+                    peak_memory=peak_memory,
+                    start_time=start_time,
+                    end_time=time.time(),
+                    error_message=error_message,
+                    retry_count=retry_count,
+                )
+            ]
             
         finally:
             end_time = time.time()
@@ -280,17 +328,7 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
                 )
             self.concurrent_sessions -= 1
             
-        return CrawlerTaskResult(
-            task_id=task_id,
-            url=url,
-            result=result,
-            memory_usage=memory_usage,
-            peak_memory=peak_memory,
-            start_time=start_time,
-            end_time=end_time,
-            error_message=error_message,
-            retry_count=retry_count
-        )
+        return task_results
         
     async def run_urls(
         self,
@@ -356,8 +394,8 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
                     
                     # Process completed tasks
                     for completed_task in done:
-                        result = await completed_task
-                        results.append(result)
+                        task_result = await completed_task
+                        results.extend(task_result)
                         
                     # Update active tasks list
                     active_tasks = list(pending)
@@ -501,12 +539,13 @@ class MemoryAdaptiveDispatcher(BaseDispatcher):
                     )
                     
                     for completed_task in done:
-                        result = await completed_task
-                        
-                        # Only count as completed if it wasn't requeued
-                        if "requeued" not in result.error_message:
-                            completed_count += 1
-                            yield result
+                        task_results = await completed_task
+
+                        if all("requeued" in r.error_message for r in task_results):
+                            continue
+                        completed_count += 1
+                        for r in task_results:
+                            yield r
                         
                     # Update active tasks list
                     active_tasks = list(pending)
@@ -547,6 +586,7 @@ class SemaphoreDispatcher(BaseDispatcher):
         error_message = ""
         memory_usage = peak_memory = 0.0
 
+        task_results = []
         try:
             if self.monitor:
                 self.monitor.update_task(
@@ -564,28 +604,50 @@ class SemaphoreDispatcher(BaseDispatcher):
 
                 memory_usage = peak_memory = end_memory - start_memory
 
-                if self.rate_limiter and result.status_code:
-                    if not self.rate_limiter.update_delay(url, result.status_code):
-                        error_message = f"Rate limit retry count exceeded for domain {urlparse(url).netloc}"
+                if isinstance(result, CrawlResultContainer):
+                    result_list = list(result)
+                elif isinstance(result, list):
+                    result_list = result
+                else:
+                    result_list = [result]
+
+                task_results = []
+                for idx, res in enumerate(result_list):
+                    if self.rate_limiter and res.status_code:
+                        if not self.rate_limiter.update_delay(res.url, res.status_code):
+                            error_message = f"Rate limit retry count exceeded for domain {urlparse(res.url).netloc}"
+                            if self.monitor:
+                                self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
+                            return [CrawlerTaskResult(
+                                task_id=task_id,
+                                url=res.url,
+                                result=res,
+                                memory_usage=memory_usage,
+                                peak_memory=peak_memory,
+                                start_time=start_time,
+                                end_time=time.time(),
+                                error_message=error_message,
+                            )]
+
+                    if not res.success:
+                        error_message = res.error_message
                         if self.monitor:
                             self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
-                        return CrawlerTaskResult(
-                            task_id=task_id,
-                            url=url,
-                            result=result,
+                    elif self.monitor:
+                        self.monitor.update_task(task_id, status=CrawlStatus.COMPLETED)
+
+                    task_results.append(
+                        CrawlerTaskResult(
+                            task_id=f"{task_id}:{idx}" if len(result_list) > 1 else task_id,
+                            url=res.url,
+                            result=res,
                             memory_usage=memory_usage,
                             peak_memory=peak_memory,
                             start_time=start_time,
                             end_time=time.time(),
-                            error_message=error_message,
+                            error_message=res.error_message if not res.success else "",
                         )
-
-                if not result.success:
-                    error_message = result.error_message
-                    if self.monitor:
-                        self.monitor.update_task(task_id, status=CrawlStatus.FAILED)
-                elif self.monitor:
-                    self.monitor.update_task(task_id, status=CrawlStatus.COMPLETED)
+                    )
 
         except Exception as e:
             error_message = str(e)
@@ -606,16 +668,7 @@ class SemaphoreDispatcher(BaseDispatcher):
                     error_message=error_message,
                 )
 
-        return CrawlerTaskResult(
-            task_id=task_id,
-            url=url,
-            result=result,
-            memory_usage=memory_usage,
-            peak_memory=peak_memory,
-            start_time=start_time,
-            end_time=end_time,
-            error_message=error_message,
-        )
+        return task_results
 
     async def run_urls(
         self,
@@ -640,7 +693,14 @@ class SemaphoreDispatcher(BaseDispatcher):
                 )
                 tasks.append(task)
 
-            return await asyncio.gather(*tasks, return_exceptions=True)
+            gathered = await asyncio.gather(*tasks, return_exceptions=True)
+            flattened = []
+            for item in gathered:
+                if isinstance(item, list):
+                    flattened.extend(item)
+                else:
+                    flattened.append(item)
+            return flattened
         finally:
             if self.monitor:
                 self.monitor.stop()
