@@ -741,7 +741,17 @@ class AsyncPlaywrightCrawlerStrategy(AsyncCrawlerStrategy):
                     )
                     redirected_url = page.url
                 except Error as e:
-                    raise RuntimeError(f"Failed on navigating ACS-GOTO:\n{str(e)}")
+                    error_msg = f"Failed on navigating ACS-GOTO:\n{str(e)}"
+                    if config.capture_network_requests and captured_requests:
+                        last = captured_requests[-1]
+                        url_info = last.get("url")
+                        method = last.get("method")
+                        status = last.get("status") or last.get("failure_text")
+                        error_msg += (
+                            f"\nLast request => URL: {url_info}, "
+                            f"Method: {method}, Status: {status}"
+                        )
+                    raise RuntimeError(error_msg)
 
                 await self.execute_hook(
                     "after_goto", page, context=context, url=url, response=response, config=config

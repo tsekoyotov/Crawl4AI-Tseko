@@ -3,10 +3,13 @@ import sys
 import pytest
 
 # Add the parent directory to the Python path
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+parent_dir = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 sys.path.append(parent_dir)
 
 from crawl4ai.async_webcrawler import AsyncWebCrawler
+from crawl4ai.async_configs import CrawlerRunConfig
 
 
 @pytest.mark.asyncio
@@ -66,6 +69,19 @@ async def test_screenshot():
         assert result.screenshot
         assert isinstance(result.screenshot, str)
         assert len(result.screenshot) > 0
+
+
+@pytest.mark.asyncio
+async def test_navigation_error_includes_last_request():
+    async with AsyncWebCrawler(verbose=True) as crawler:
+        run_config = CrawlerRunConfig(
+            capture_network_requests=True,
+            page_timeout=1000,
+        )
+        url = "http://nonexistent.invalid"
+        result = await crawler.arun(url=url, config=run_config)
+        assert not result.success
+        assert "Last request" in result.error_message
 
 
 # Entry point for debugging
