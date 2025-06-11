@@ -40,7 +40,8 @@ from utils import (
     get_base_url,
     is_task_id,
     should_cleanup_task,
-    decode_redis_hash
+    decode_redis_hash,
+    quick_url_check,
 )
 
 import psutil, time
@@ -176,6 +177,13 @@ async def handle_markdown_request(
         decoded_url = unquote(url)
         if not decoded_url.startswith(('http://', 'https://')):
             decoded_url = 'https://' + decoded_url
+
+        # Perform a quick connectivity check to fail fast on unreachable URLs
+        if not await quick_url_check(decoded_url, timeout=3):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="URL unreachable or returned error during precheck",
+            )
 
         if filter_type == FilterType.RAW:
             md_generator = DefaultMarkdownGenerator()
