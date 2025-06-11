@@ -7,6 +7,8 @@ from enum import Enum
 from pathlib import Path
 from fastapi import Request
 from typing import Dict, Optional
+import aiohttp
+from aiohttp import ClientTimeout
 
 class TaskStatus(str, Enum):
     PROCESSING = "processing"
@@ -70,4 +72,42 @@ def verify_email_domain(email: str) -> bool:
         return False
     except Exception as e:
         logging.error("Unexpected error verifying %s: %s", domain, e, exc_info=True)
+        return False
+
+
+async def quick_url_check(url: str, timeout: int = 3) -> bool:
+    """Fast check to see if a URL is reachable within the given timeout.
+
+    Performs a HEAD request (falling back to GET) with a short timeout so
+    the caller can quickly fail before starting a full crawl.
+
+    Args:
+        url: Target URL to test.
+        timeout: Timeout in seconds for the request.
+
+    Returns:
+        True if the response status is < 400 within the timeout, False otherwise.
+    """
+    try:
+        client_timeout = ClientTimeout(total=timeout)
+        async with aiohttp.ClientSession(timeout=client_timeout) as session:
+            try:
+                async with session.head(url, allow_redirects=True) as resp:
+                    return resp.status < 400
+            except aiohttp.ClientResponseError as e:
+                if e.status != 405:
+                    return False
+            except Exception:
+                pass
+
+            try:
+                async with session.get(
+                    url,
+                    allow_redirects=True,
+                    headers={"Range": "bytes=0-0"},
+                ) as resp:
+                    return resp.status < 400
+            except Exception:
+                return False
+    except Exception:
         return False
