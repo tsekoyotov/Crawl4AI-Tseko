@@ -331,13 +331,16 @@ Example request:
       "deep_crawl_strategy": {
         "type": "BFSDeepCrawlStrategy",
         "params": {"max_depth": 1, "max_pages": 4}
-      }
+      },
+      "check_robots_txt": true
     }
   }
 }
 ```
 
 Adapted from [`demo_docker_api.py`](docs/examples/docker/demo_docker_api.py).
+
+Set `check_robots_txt` to `true` when you want Crawl4AI to verify that each URL is allowed by the site's `robots.txt` before scraping.
 
 
 ## 🔬 Advanced Usage Examples 🔬
