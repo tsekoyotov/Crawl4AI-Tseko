@@ -429,6 +429,8 @@ docker buildx build \
 
 Communicate with the running Docker server via its REST API (defaulting to `http://localhost:8080`). You can use the Python SDK or make direct HTTP requests.
 
+Before processing a request, the server quickly checks that each URL is reachable. It tries a `HEAD` request, then a short ranged `GET`, and finally a normal `GET` if needed. This fallback protects against sites that reject range requests so valid URLs are not mistakenly skipped.
+
 ### Playground Interface
 
 A built-in web playground is available at `http://localhost:8080/playground` for testing and generating API requests. The playground allows you to:
