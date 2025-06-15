@@ -78,8 +78,9 @@ def verify_email_domain(email: str) -> bool:
 async def quick_url_check(url: str, timeout: int = 3) -> bool:
     """Fast check to see if a URL is reachable within the given timeout.
 
-    Performs a HEAD request (falling back to GET) with a short timeout so
-    the caller can quickly fail before starting a full crawl.
+    Performs a HEAD request followed by a ranged GET. If both checks fail,
+    a normal GET is attempted as a final fallback. This ensures we don't
+    incorrectly reject URLs from servers that block range requests.
 
     Args:
         url: Target URL to test.
@@ -105,6 +106,18 @@ async def quick_url_check(url: str, timeout: int = 3) -> bool:
                     url,
                     allow_redirects=True,
                     headers={"Range": "bytes=0-0"},
+                ) as resp:
+                    return resp.status < 400
+            except Exception:
+                pass
+
+            # Some servers reject range requests or respond incorrectly, so
+            # attempt a standard GET as a final fallback before giving up.
+            try:
+                async with session.get(
+                    url,
+                    allow_redirects=True,
+                    headers={"User-Agent": "Crawl4AI"},
                 ) as resp:
                     return resp.status < 400
             except Exception:
