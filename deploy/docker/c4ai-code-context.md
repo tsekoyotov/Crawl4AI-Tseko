@@ -711,7 +711,7 @@ class CrawlerRunConfig():
         wait_until (str): The condition to wait for when navigating, e.g. "domcontentloaded".
                           Default: "domcontentloaded".
         page_timeout (int): Timeout in ms for page operations like navigation.
-                            Default: 60000 (60 seconds).
+                            Default: 3000 (3 seconds).
         wait_for (str or None): A CSS selector or JS condition to wait for before extracting content.
                                 Default: None.
         wait_for_images (bool): If True, wait for images to load before extracting content.
