@@ -28,6 +28,12 @@ def load_config() -> Dict:
         config = yaml.safe_load(config_file)
     # Allow port override via environment variable
     config["app"]["port"] = int(os.getenv("PORT", config["app"]["port"]))
+
+    # Optionally allow skipping URL precheck via environment variable
+    skip_pre = os.getenv("SKIP_PRECHECK")
+    if skip_pre is not None:
+        config.setdefault("crawler", {})["skip_precheck"] = skip_pre.lower() == "true"
+
     return config
 
 def setup_logging(config: Dict) -> None:

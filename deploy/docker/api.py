@@ -178,12 +178,12 @@ async def handle_markdown_request(
         if not decoded_url.startswith(('http://', 'https://')):
             decoded_url = 'https://' + decoded_url
 
-        # Perform a quick connectivity check to fail fast on unreachable URLs
-        if not await quick_url_check(decoded_url, timeout=3):
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="URL unreachable or returned error during precheck",
-            )
+        skip_precheck = config.get("crawler", {}).get("skip_precheck", False)
+        if skip_precheck:
+            logger.warning("skip_precheck enabled; skipping quick check for %s", decoded_url)
+        else:
+            if not await quick_url_check(decoded_url, timeout=3):
+                logger.warning("Quick URL check failed for %s; proceeding anyway", decoded_url)
 
         if filter_type == FilterType.RAW:
             md_generator = DefaultMarkdownGenerator()

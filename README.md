@@ -682,6 +682,10 @@ If a page fails to load with a `net::ERR_ABORTED` error:
 
 See the [Network Requests & Console Message Capturing guide](docs/md_v2/advanced/network-console-capture.md#handling-neterr_aborted-errors) for details.
 
+### Skipping URL Precheck
+
+The Docker API performs a quick connectivity test before crawling a page. Some servers reject these HEAD or range requests, causing the check to fail even though the page is reachable. Set `crawler.skip_precheck: true` in `deploy/docker/config.yml` (or `SKIP_PRECHECK=true` as an environment variable) to bypass this test. When enabled—or when the quick check fails—the server logs a warning and continues crawling.
+
 
 ## 📖 Documentation & Roadmap 
 
