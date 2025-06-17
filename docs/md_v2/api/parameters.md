@@ -102,7 +102,7 @@ Use these for controlling whether you read or write from a local content cache. 
 | **Parameter**              | **Type / Default**      | **What It Does**                                                                                                    |
 |----------------------------|-------------------------|----------------------------------------------------------------------------------------------------------------------|
 | **`wait_until`**           | `str` (domcontentloaded)| Condition for navigation to “complete”. Often `"networkidle"` or `"domcontentloaded"`.                               |
-| **`page_timeout`**         | `int` (60000 ms)        | Timeout for page navigation or JS steps. Increase for slow sites.                                                    |
+| **`page_timeout`**         | `int` (3000 ms)        | Timeout for page navigation or JS steps. Increase for slow sites.                                                    |
 | **`wait_for`**             | `str or None`           | Wait for a CSS (`"css:selector"`) or JS (`"js:() => bool"`) condition before content extraction.                     |
 | **`wait_for_images`**      | `bool` (False)          | Wait for images to load before finishing. Slows down if you only want text.                                          |
 | **`delay_before_return_html`** | `float` (0.1)       | Additional pause (seconds) before final HTML is captured. Good for last-second updates.                               |

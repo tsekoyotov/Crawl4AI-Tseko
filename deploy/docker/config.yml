@@ -50,8 +50,9 @@ security:
 crawler:
   base_config:
     simulate_user: true
+    page_timeout: 3000  # 3 seconds to quickly fail unreachable pages
   memory_threshold_percent: 95.0
-  skip_precheck: false
+  skip_precheck: true
   rate_limiter:
     enabled: true
     base_delay: [1.0, 2.0]

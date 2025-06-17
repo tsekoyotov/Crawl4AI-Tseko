@@ -709,7 +709,7 @@ security:
 # Crawler Configuration
 crawler:
   memory_threshold_percent: 95.0
-  skip_precheck: false # Skip quick connectivity test before crawling
+  skip_precheck: true # Skip quick connectivity test before crawling
   rate_limiter:
     base_delay: [1.0, 2.0] # Min/max delay between requests in seconds for dispatcher
   timeouts:
@@ -786,7 +786,7 @@ You can override the default `config.yml`.
 
 2. **Resource Management** 💻
    - Adjust memory_threshold_percent based on available RAM
-   - Set skip_precheck to `true` if servers block HEAD requests
+  - `skip_precheck` is enabled by default; set it to `false` if you want a quick connectivity check
    - Set timeouts according to your content size and network conditions
    - Use Redis for rate limiting in multi-container setups
 

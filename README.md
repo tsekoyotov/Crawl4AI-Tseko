@@ -684,7 +684,7 @@ See the [Network Requests & Console Message Capturing guide](docs/md_v2/advanced
 
 ### Skipping URL Precheck
 
-The Docker API performs a quick connectivity test before crawling a page. Some servers reject these HEAD or range requests, causing the check to fail even though the page is reachable. Set `crawler.skip_precheck: true` in `deploy/docker/config.yml` (or `SKIP_PRECHECK=true` as an environment variable) to bypass this test. When enabled—or when the quick check fails—the server logs a warning and continues crawling.
+The Docker API performs a quick connectivity test before crawling a page. Some servers reject these HEAD or range requests, causing the check to fail even though the page is reachable. This check is skipped by default (`crawler.skip_precheck: true`). Set `crawler.skip_precheck: false` (or `SKIP_PRECHECK=false`) to re-enable the check. When disabled—or when the quick check fails—the server logs a warning and continues crawling.
 
 
 ## 📖 Documentation & Roadmap 
